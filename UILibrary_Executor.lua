@@ -18,7 +18,6 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 
 -- Variables
 local Player = Players.LocalPlayer
@@ -349,7 +348,7 @@ function UILibrary.CreateWindow(title, size)
     local self = setmetatable({}, Window)
     
     self.Name = title
-    self.Tabs = {}
+    self.Tabs = {} -- Initialize tabs table here
     self.Components = {}
     self.Minimized = false
     self.Hidden = false
@@ -508,21 +507,25 @@ function Window:UpdateTheme()
     self.TabContainer.BackgroundColor3 = UILibrary.Data.Theme.Background
     
     for _, tab in pairs(self.Tabs) do
-        tab:UpdateTheme()
+        if tab.UpdateTheme then
+            tab:UpdateTheme()
+        end
     end
 end
 
 function Window:GetComponentValues()
     local values = {}
     for _, tab in pairs(self.Tabs) do
-        values[tab.Name] = tab:GetComponentValues()
+        if tab.GetComponentValues then
+            values[tab.Name] = tab:GetComponentValues()
+        end
     end
     return values
 end
 
 function Window:LoadComponentValues(values)
     for _, tab in pairs(self.Tabs) do
-        if values[tab.Name] then
+        if tab.LoadComponentValues and values[tab.Name] then
             tab:LoadComponentValues(values[tab.Name])
         end
     end
@@ -1241,6 +1244,7 @@ end
 
 function ColorPicker:setDisplay()
     -- Simple color picker implementation
+    -- In a full implementation, this would open a color wheel/palette
     local colors = {
         Color3.fromRGB(255, 0, 0),
         Color3.fromRGB(0, 255, 0),
@@ -1258,6 +1262,7 @@ end
 
 function ColorPicker:rgbBoxes()
     -- RGB input boxes implementation would go here
+    -- This is a placeholder for the full RGB input system
 end
 
 function ColorPicker:Set(color)
@@ -1366,7 +1371,7 @@ function Keybind:UpdateTheme()
     self.KeybindButton.TextColor3 = UILibrary.Data.Theme.Text
 end
 
--- Section Class
+-- Section and Label Classes
 local Section = {}
 Section.__index = Section
 
@@ -1414,7 +1419,6 @@ function Section:UpdateTheme()
     self.Frame.Line.BackgroundColor3 = UILibrary.Data.Theme.Accent
 end
 
--- Label Class
 local Label = {}
 Label.__index = Label
 
@@ -1460,7 +1464,6 @@ function Label:UpdateTheme()
     self.Label.TextColor3 = UILibrary.Data.Theme.TextDark
 end
 
--- Paragraph Class
 local Paragraph = {}
 Paragraph.__index = Paragraph
 
@@ -1509,6 +1512,8 @@ end
 
 -- Example Usage
 local window = UILibrary.CreateWindow("UI Library Demo", UDim2.new(0, 600, 0, 450))
+
+-- Create tabs
 local mainTab = window:CreateTab("Main")
 local settingsTab = window:CreateTab("Settings")
 
@@ -1565,5 +1570,3 @@ settingsTab:CreateButton("Light Theme", function()
 end)
 
 print("UI Library loaded successfully!")
-
-return UILibrary
